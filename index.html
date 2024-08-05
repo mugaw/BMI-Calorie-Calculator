@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="logo.svg" type="image/x-icon">
     <title>BMI and Calorie Calculator</title>
     <style>
         .heart {
@@ -145,6 +144,21 @@
             animation: fadeIn 1.5s;
         }
 
+        #languageToggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 10px;
+            cursor: pointer;
+        }
+        
+        #languageToggle img {
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
         footer {
             text-align: center;
             margin-top: auto;
@@ -164,8 +178,11 @@
     </style>
 </head>
 <body>
-
 <div class="container">
+    <button id="languageToggle" onclick="toggleLanguage()">
+        <span id="languageText">Switch to Arabic / تغيير إلى العربية</span>
+        <img id="languageIcon" src="en_icon.png" alt="Language Icon">
+    </button>    
     <h1>BMI and Calorie Calculator</h1>
     <div class="input-group">
         <label for="weight">Weight (kg):</label>
@@ -209,111 +226,125 @@
     <button onclick="calculate()">Calculate</button>
 </div>
 
-<div class="overlay" id="overlay"></div>
-
-<div class="popup" id="popup">
-    <div class="popup-close">
-        <button onclick="closePopup()">&times;</button>
-    </div>
-    <div id="result"></div>
-</div>
-
 <footer>
-    <p>
-        Copyrights Reserved to the Creator Muhammad Gawad &copy;. <br>
-        Made by <span class="heart">&#10084;</span>
-    </p>
+    <p>Copyrights Reserved to the Creator Muhammad Gawad ©.</p>
+    <p>Made with <span class="heart">❤</span></p>
 </footer>
 
 <script>
-    function calculate() {
-        const weight = parseFloat(document.getElementById('weight').value);
-        const height = parseFloat(document.getElementById('height').value);
-        const age = parseInt(document.getElementById('age').value);
-        const gender = document.getElementById('gender').value;
-        const activity = document.getElementById('activity').value;
-        const goal = document.getElementById('goal').value;
+let currentLanguage = 'en';
 
-        if (!weight || !height || !age || !gender || !activity || !goal) {
-            alert('Please fill in all fields.');
-            return;
-        }
-
-        // BMI equations //
-        const heightMeters = height / 100;
-        const bmi = weight / (heightMeters * heightMeters);
-
-        // BMR Equations //
-        let bmr;
-        if (gender === 'male') {
-            bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-        } else {
-            bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-        }
-
-        // daily caloric needs equations //
-        let dailyCalories;
-        switch (activity) {
-            case 'sedentary':
-                dailyCalories = bmr * 1.2;
-                break;
-            case 'light':
-                dailyCalories = bmr * 1.375;
-                break;
-            case 'moderate':
-                dailyCalories = bmr * 1.55;
-                break;
-            case 'active':
-                dailyCalories = bmr * 1.725;
-                break;
-            case 'extra':
-                dailyCalories = bmr * 1.9;
-                break;
-        }
-
-        // Adjust daily calories for goal //
-        if (goal === 'lose') {
-            dailyCalories -= 500; // Reduce 500 calories/day to lose weight
-        } else {
-            dailyCalories += 500; // Add 500 calories/day to gain weight
-        }
-
-        // protein intake equations //
-        const proteinIntake = weight * 2; // 2 grams of protein per kg of body weight
-
-        // Display results //
-        const resultDiv = document.getElementById('result');
-        resultDiv.innerHTML = `
-            <h2>Results</h2>
-            <p><strong>BMI:</strong> ${bmi.toFixed(2)}</p>
-            <p><strong>Daily Caloric Needs:</strong> ${dailyCalories.toFixed(2)} calories</p>
-            <p><strong>Recommended Protein Intake:</strong> ${proteinIntake.toFixed(2)} grams</p>
-        `;
-
-        // Show popup // 
-        showPopup();
+const translations = {
+    en: {
+        title: "BMI and Calorie Calculator",
+        weight: "Weight (kg):",
+        height: "Height (cm):",
+        age: "Age:",
+        gender: "Gender:",
+        selectGender: "Select your gender",
+        male: "Male",
+        female: "Female",
+        activity: "Activity Level:",
+        selectActivity: "Select activity level",
+        sedentary: "Sedentary (little or no exercise)",
+        light: "Lightly active (light exercise/sports 1-3 days/week)",
+        moderate: "Moderately active (moderate exercise/sports 3-5 days/week)",
+        active: "Very active (hard exercise/sports 6-7 days a week)",
+        extra: "Extra active (very hard exercise/sports & physical job)",
+        goal: "Goal:",
+        selectGoal: "Select your goal",
+        lose: "Lose Weight",
+        gain: "Gain Weight",
+        calculate: "Calculate",
+        switchLanguage: "Switch to Arabic / تغيير إلى العربية",
+        weightPlaceholder: "Enter your weight",
+        heightPlaceholder: "Enter your height",
+        agePlaceholder: "Enter your age",
+        copyright: "Copyrights Reserved to the Creator Muhammad Gawad ©.",
+        madeWith: "Made with",
+        languageIcon: "img/Egy.webp"
+    },
+    ar: {
+        title: "حاسبة مؤشر كتلة الجسم والسعرات الحرارية",
+        weight: "الوزن (كجم):",
+        height: "الطول (سم):",
+        age: "العمر:",
+        gender: "الجنس:",
+        selectGender: "اختر جنسك",
+        male: "ذكر",
+        female: "أنثى",
+        activity: "مستوى النشاط:",
+        selectActivity: "اختر مستوى النشاط",
+        sedentary: "قليل الحركة (قليل من التمارين أو لا تمارين)",
+        light: "نشاط خفيف (تمارين خفيفة/رياضة 1-3 أيام في الأسبوع)",
+        moderate: "نشاط معتدل (تمارين معتدلة/رياضة 3-5 أيام في الأسبوع)",
+        active: "نشاط عالي (تمارين قوية/رياضة 6-7 أيام في الأسبوع)",
+        extra: "نشاط مكثف (تمارين قوية جداً/رياضة ووظيفة بدنية)",
+        goal: "الهدف:",
+        selectGoal: "اختر هدفك",
+        lose: "إنقاص الوزن",
+        gain: "زيادة الوزن",
+        calculate: "احسب",
+        switchLanguage: "Switch to English / تغيير إلى الإنجليزية",
+        weightPlaceholder: "أدخل وزنك",
+        heightPlaceholder: "أدخل طولك",
+        agePlaceholder: "أدخل عمرك",
+        copyright: "جميع الحقوق محفوظة للمبدع محمد جواد ©.",
+        madeWith: "صنع بـ",
+        languageIcon: "img/UK.webp"
     }
+};
 
-    function showPopup() {
-        const popup = document.getElementById('popup');
-        const overlay = document.getElementById('overlay');
-        popup.style.display = 'block';
-        overlay.style.display = 'block';
-        popup.style.animation = 'fadeIn 1.5s';
-        overlay.style.animation = 'fadeIn 1.5s';
-    }
+function toggleLanguage() {
+    currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+    updateLanguage();
+}
 
-    function closePopup() {
-        const popup = document.getElementById('popup');
-        const overlay = document.getElementById('overlay');
-        popup.style.animation = 'fadeOut 1.5s';
-        overlay.style.animation = 'fadeOut 1.5s';
-        setTimeout(() => {
-            popup.style.display = 'none';
-            overlay.style.display = 'none';
-        }, 1500);
-    }
+function updateLanguage() {
+    document.querySelector('h1').textContent = translations[currentLanguage].title;
+    document.querySelector('label[for="weight"]').textContent = translations[currentLanguage].weight;
+    document.querySelector('label[for="height"]').textContent = translations[currentLanguage].height;
+    document.querySelector('label[for="age"]').textContent = translations[currentLanguage].age;
+    document.querySelector('label[for="gender"]').textContent = translations[currentLanguage].gender;
+    document.querySelector('#gender option[value=""]').textContent = translations[currentLanguage].selectGender;
+    document.querySelector('#gender option[value="male"]').textContent = translations[currentLanguage].male;
+    document.querySelector('#gender option[value="female"]').textContent = translations[currentLanguage].female;
+    document.querySelector('label[for="activity"]').textContent = translations[currentLanguage].activity;
+    document.querySelector('#activity option[value=""]').textContent = translations[currentLanguage].selectActivity;
+    document.querySelector('#activity option[value="sedentary"]').textContent = translations[currentLanguage].sedentary;
+    document.querySelector('#activity option[value="light"]').textContent = translations[currentLanguage].light;
+    document.querySelector('#activity option[value="moderate"]').textContent = translations[currentLanguage].moderate;
+    document.querySelector('#activity option[value="active"]').textContent = translations[currentLanguage].active;
+    document.querySelector('#activity option[value="extra"]').textContent = translations[currentLanguage].extra;
+    document.querySelector('label[for="goal"]').textContent = translations[currentLanguage].goal;
+    document.querySelector('#goal option[value=""]').textContent = translations[currentLanguage].selectGoal;
+    document.querySelector('#goal option[value="lose"]').textContent = translations[currentLanguage].lose;
+    document.querySelector('#goal option[value="gain"]').textContent = translations[currentLanguage].gain;
+    document.querySelector('button[onclick="calculate()"]').textContent = translations[currentLanguage].calculate;
+    document.querySelector('#languageText').textContent = translations[currentLanguage].switchLanguage;
+    document.querySelector('#languageIcon').src = translations[currentLanguage].languageIcon;
+
+    // Update placeholders
+    document.querySelector('#weight').placeholder = translations[currentLanguage].weightPlaceholder;
+    document.querySelector('#height').placeholder = translations[currentLanguage].heightPlaceholder;
+    document.querySelector('#age').placeholder = translations[currentLanguage].agePlaceholder;
+
+    // Update footer
+    document.querySelector('footer p:first-child').textContent = translations[currentLanguage].copyright;
+    document.querySelector('footer p:last-child').innerHTML = `${translations[currentLanguage].madeWith} <span class="heart">❤</span>`;
+
+    // Change text direction for Arabic
+    document.body.style.direction = currentLanguage === 'ar' ? 'rtl' : 'ltr';
+}
+
+// Call updateLanguage when the page loads
+document.addEventListener('DOMContentLoaded', updateLanguage);
+
+// Placeholder for the calculate function
+function calculate() {
+    // Implement your calculation logic here
+    alert("Calculation function not implemented yet");
+}
 </script>
-
 </body>
 </html>
