@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BMI and Calorie Calculator</title>
@@ -154,9 +152,8 @@
         }
         
         #languageToggle img {
-            width: 24px;
-            height: 24px;
-            background: rgba(0, 0, 0, 0.1);
+            width: 34px;
+            height: 34px;
         }
 
         footer {
@@ -177,54 +174,62 @@
         }
     </style>
 </head>
-<body>
+<body style="direction: ltr;">
 <div class="container">
     <button id="languageToggle" onclick="toggleLanguage()">
         <span id="languageText">Switch to Arabic / تغيير إلى العربية</span>
-        <img id="languageIcon" src="en_icon.png" alt="Language Icon">
+        <img id="languageIcon" src="img/Egy.webp" alt="Language Icon">
     </button>    
     <h1>BMI and Calorie Calculator</h1>
     <div class="input-group">
         <label for="weight">Weight (kg):</label>
-        <input type="number" id="weight" placeholder="Enter your weight" required>
+        <input type="number" id="weight" placeholder="Enter your weight" required="">
     </div>
     <div class="input-group">
         <label for="height">Height (cm):</label>
-        <input type="number" id="height" placeholder="Enter your height" required>
+        <input type="number" id="height" placeholder="Enter your height" required="">
     </div>
     <div class="input-group">
         <label for="age">Age:</label>
-        <input type="number" id="age" placeholder="Enter your age" required>
+        <input type="number" id="age" placeholder="Enter your age" required="">
     </div>
     <div class="input-group">
         <label for="gender">Gender:</label>
-        <select id="gender" required>
-            <option value="" disabled selected>Select your gender</option>
+        <select id="gender" required="">
+            <option value="" disabled="" selected="">Select your gender</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
         </select>
     </div>
     <div class="input-group">
         <label for="activity">Activity Level:</label>
-        <select id="activity" required>
-            <option value="" disabled selected>Select activity level</option>
+        <select id="activity" required="">
+            <option value="" disabled="" selected="">Select activity level</option>
             <option value="sedentary">Sedentary (little or no exercise)</option>
             <option value="light">Lightly active (light exercise/sports 1-3 days/week)</option>
             <option value="moderate">Moderately active (moderate exercise/sports 3-5 days/week)</option>
             <option value="active">Very active (hard exercise/sports 6-7 days a week)</option>
-            <option value="extra">Extra active (very hard exercise/sports & physical job)</option>
+            <option value="extra">Extra active (very hard exercise/sports &amp; physical job)</option>
         </select>
     </div>
     <div class="input-group">
         <label for="goal">Goal:</label>
-        <select id="goal" required>
-            <option value="" disabled selected>Select your goal</option>
+        <select id="goal" required="">
+            <option value="" disabled="" selected="">Select your goal</option>
             <option value="lose">Lose Weight</option>
             <option value="gain">Gain Weight</option>
         </select>
     </div>
     <button onclick="calculate()">Calculate</button>
 </div>
+
+<div id="popup" class="popup">
+    <div class="popup-close">
+        <button onclick="closePopup()">&times;</button>
+    </div>
+    <div id="result"></div>
+</div>
+<div id="overlay" class="overlay" onclick="closePopup()"></div>
 
 <footer>
     <p>Copyrights Reserved to the Creator Muhammad Gawad ©.</p>
@@ -342,9 +347,80 @@ document.addEventListener('DOMContentLoaded', updateLanguage);
 
 // Placeholder for the calculate function
 function calculate() {
-    // Implement your calculation logic here
-    alert("Calculation function not implemented yet");
+    const weight = parseFloat(document.getElementById('weight').value);
+    const height = parseFloat(document.getElementById('height').value);
+    const age = parseInt(document.getElementById('age').value);
+    const gender = document.getElementById('gender').value;
+    const activity = document.getElementById('activity').value;
+    const goal = document.getElementById('goal').value;
+
+    if (!weight || !height || !age || !gender || !activity || !goal) {
+        alert('Please fill in all fields.');
+        return;
+    }
+
+    // BMI calculation
+    const heightMeters = height / 100;
+    const bmi = weight / (heightMeters * heightMeters);
+
+    // BMR calculation
+    let bmr;
+    if (gender === 'male') {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+
+    // Daily caloric needs calculation
+    let dailyCalories;
+    switch (activity) {
+        case 'sedentary':
+            dailyCalories = bmr * 1.2;
+            break;
+        case 'light':
+            dailyCalories = bmr * 1.375;
+            break;
+        case 'moderate':
+            dailyCalories = bmr * 1.55;
+            break;
+        case 'active':
+            dailyCalories = bmr * 1.725;
+            break;
+        case 'extra':
+            dailyCalories = bmr * 1.9;
+            break;
+    }
+
+    // Adjust for weight goal
+    if (goal === 'lose') {
+        dailyCalories -= 500;
+    } else if (goal === 'gain') {
+        dailyCalories += 500;
+    }
+
+    // Protein intake recommendation
+    const proteinIntake = weight * 1.6;
+
+    // Display results
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `
+        <h2>Results</h2>
+        <p><strong>BMI:</strong> ${bmi.toFixed(2)}</p>
+        <p><strong>Daily Caloric Needs:</strong> ${dailyCalories.toFixed(2)} kcal</p>
+        <p><strong>Recommended Protein Intake:</strong> ${proteinIntake.toFixed(2)} grams/day</p>
+    `;
+
+    // Show popup
+    document.getElementById('popup').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+}
+
+function closePopup() {
+    document.getElementById('popup').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
 }
 </script>
+
+
 </body>
 </html>
